@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 # Stages
 MAIN_MENU = 0
+GAME = 1
 # Callback data
 
 
@@ -171,8 +172,8 @@ def main() -> None:
     # So ^ABC$ will only allow 'ABC'
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
-        MAIN_MENU={
-            FIRST: [
+        states={
+            MAIN_MENU: [
                 CallbackQueryHandler(with_rebot, pattern='^with_rebot$'),
                 CallbackQueryHandler(help_msg, pattern='^help$'),
                 CallbackQueryHandler(start_over, pattern='^main$'),
@@ -180,7 +181,7 @@ def main() -> None:
                 # CallbackQueryHandler(three, pattern='^' + str(THREE) + '$'),
                 # CallbackQueryHandler(four, pattern='^' + str(FOUR) + '$'),
             ],
-            SECOND: [
+            GAME: [
                 CallbackQueryHandler(start_over, pattern='^restart$'),
                 CallbackQueryHandler(end, pattern='^end$'),
             ],
