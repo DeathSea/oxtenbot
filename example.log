@@ -1,0 +1,73 @@
+
+"""
+2022-06-09 13:30:49,913 - telegram.ext.dispatcher - DEBUG - Processing Update: 
+{'message': {'caption_entities': [], 'entities': [{'type': 'bot_command', 'length': 6, 'offset': 0}], 'date': 1654795849, 'new_chat_members': [], 'photo': [], 'supergroup_chat_created': False, 'delete_chat_photo': False, 
+'message_id': 17, 'channel_chat_created': False, 'new_chat_photo': [], 'group_chat_created': False, 'chat': 
+{'type': 'private', 'username': '', 'last_name': '', 'id': 0, 'first_name': ''}, 
+'text': '/start', 'from': {'last_name': '', 'language_code': 'zh-hans', 'id': , 'is_bot': False, 'username': '', 'first_name': ''}}, 'update_id': 225825537}
+2022-06-09 13:30:49,914 - telegram.ext.conversationhandler - DEBUG - selecting conversation (0, 0) with state None
+2022-06-09 13:30:49,914 - __main__ - INFO - User started the conversation.
+2022-06-09 13:30:49,914 - telegram.bot - DEBUG - Entering: send_message
+2022-06-09 13:30:50,756 - telegram.bot - DEBUG - 
+{'caption_entities': [], 'entities': [], 'date': 1654795850, 'new_chat_members': [], 'photo': [], 'supergroup_chat_created': False, 'delete_chat_photo': False, 
+'message_id': 18, 'channel_chat_created': False, 'new_chat_photo': [], 'group_chat_created': False, 
+'chat': {'type': 'private', 'username': '', 'last_name': '', 'id': 0, 'first_name': ''}, 
+'text': 'Start handler, Choose a route', 'reply_markup': 
+    {'inline_keyboard': 
+    [
+        [
+            {'callback_data': '0', 'text': '1'}, 
+            {'callback_data': '1', 'text': '2'}
+        ]
+    ]
+    }, 'from': {'id': 5417542090, 'is_bot': True, 'username': 'XOtenbot', 'first_name': 'xoten'}}
+2022-06-09 13:30:50,757 - telegram.bot - DEBUG - Exiting: send_message
+2022-06-09 13:30:55,217 - telegram.bot - DEBUG - Getting updates: [225825538]
+2022-06-09 13:30:55,218 - telegram.bot - DEBUG - [<telegram.update.Update object at 0x7f19ff102050>]
+2022-06-09 13:30:55,218 - telegram.bot - DEBUG - Exiting: get_updates
+2022-06-09 13:30:55,218 - telegram.bot - DEBUG - Entering: get_updates
+2022-06-09 13:30:55,219 - telegram.ext.dispatcher - DEBUG - Processing Update: 
+{'callback_query': 
+    {'data': '0', 'id': '476394840737360047',
+    'message': 
+        {'caption_entities': [], 'entities': [], 'date': 1654795850, 'new_chat_members': [], 'photo': [], 'supergroup_chat_created': False, 'delete_chat_photo': False, 'message_id': 18, 'channel_chat_created': False, 
+        'new_chat_photo': [], 'group_chat_created': False, 'chat': {'type': 'private', 'username': '', 'last_name': '', 'id': 0, 'first_name': ''},
+        'text': 'Start handler, Choose a route', 'reply_markup': {'inline_keyboard': [[{'callback_data': '0', 'text': '1'}, {'callback_data': '1', 'text': '2'}]]}, 
+        'from': {'id': 5417542090, 'is_bot': True, 'username': 'XOtenbot', 'first_name': 'xoten'}
+        }, 
+    'chat_instance': '8899190500344020431', 'from': {'last_name': '', 'language_code': 'zh-hans', 'id': 0, 'is_bot': False, 'username': '', 'first_name': ''}}, 'update_id': 225825538}
+2022-06-09 13:30:55,219 - telegram.ext.conversationhandler - DEBUG - selecting conversation (0, 0) with state 0
+2022-06-09 13:30:55,219 - telegram.bot - DEBUG - Entering: answer_callback_query
+2022-06-09 13:30:55,563 - telegram.bot - DEBUG - True
+2022-06-09 13:30:55,563 - telegram.bot - DEBUG - Exiting: answer_callback_query
+2022-06-09 13:30:55,563 - telegram.bot - DEBUG - Entering: edit_message_text
+2022-06-09 13:30:55,915 - telegram.bot - DEBUG - {'caption_entities': [], 'entities': [], 'date': 1654795850, 'new_chat_members': [], 'photo': [], 'supergroup_chat_created': False, 'delete_chat_photo': False, 'message_id': 18, 'edit_date': 1654795855, 'channel_chat_created': False, 'new_chat_photo': [], 'group_chat_created': False, 'chat': {'type': 'private', 'username': '', 'last_name': '', 'id': 0, 'first_name': ''}, 'text': 'First CallbackQueryHandler, Choose a route', 'reply_markup': {'inline_keyboard': [[{'callback_data': '2', 'text': '3'}, {'callback_data': '3', 'text': '4'}]]}, 'from': {'id': 5417542090, 'is_bot': True, 'username': 'XOtenbot', 'first_name': 'xoten'}}
+2022-06-09 13:30:55,915 - telegram.bot - DEBUG - Exiting: edit_message_text
+2022-06-09 13:30:58,535 - telegram.bot - DEBUG - Getting updates: [225825539]
+2022-06-09 13:30:58,535 - telegram.bot - DEBUG - [<telegram.update.Update object at 0x7f19ffc28d50>]
+2022-06-09 13:30:58,536 - telegram.bot - DEBUG - Exiting: get_updates
+2022-06-09 13:30:58,536 - telegram.bot - DEBUG - Entering: get_updates
+2022-06-09 13:30:58,536 - telegram.ext.dispatcher - DEBUG - Processing Update: {'callback_query': {'data': '2', 'id': '476394839029826529', 'message': {'caption_entities': [], 'entities': [], 'date': 1654795850, 'new_chat_members': [], 'photo': [], 'supergroup_chat_created': False, 'delete_chat_photo': False, 'message_id': 18, 'edit_date': 1654795855, 'channel_chat_created': False, 'new_chat_photo': [], 'group_chat_created': False, 'chat': {'type': 'private', 'username': '', 'last_name': '', 'id': 0, 'first_name': ''}, 'text': 'First CallbackQueryHandler, Choose a route', 'reply_markup': {'inline_keyboard': [[{'callback_data': '2', 'text': '3'}, {'callback_data': '3', 'text': '4'}]]}, 'from': {'id': 5417542090, 'is_bot': True, 'username': 'XOtenbot', 'first_name': 'xoten'}}, 'chat_instance': '8899190500344020431', 'from': {'last_name': '', 'language_code': 'zh-hans', 'id': 0, 'is_bot': False, 'username': '', 'first_name': ''}}, 'update_id': 225825539}
+2022-06-09 13:30:58,537 - telegram.ext.conversationhandler - DEBUG - selecting conversation (0, 0) with state 0
+2022-06-09 13:30:58,537 - telegram.bot - DEBUG - Entering: answer_callback_query
+2022-06-09 13:30:58,997 - telegram.bot - DEBUG - True
+2022-06-09 13:30:58,997 - telegram.bot - DEBUG - Exiting: answer_callback_query
+2022-06-09 13:30:58,998 - telegram.bot - DEBUG - Entering: edit_message_text
+2022-06-09 13:30:59,347 - telegram.bot - DEBUG - {'caption_entities': [], 'entities': [], 'date': 1654795850, 'new_chat_members': [], 'photo': [], 'supergroup_chat_created': False, 'delete_chat_photo': False, 'message_id': 18, 'edit_date': 1654795859, 'channel_chat_created': False, 'new_chat_photo': [], 'group_chat_created': False, 'chat': {'type': 'private', 'username': '', 'last_name': '', 'id': 0, 'first_name': ''}, 'text': 'Third CallbackQueryHandler. Do want to start over?', 'reply_markup': {'inline_keyboard': [[{'callback_data': '0', 'text': "Yes, let's do it again!"}, {'callback_data': '1', 'text': "Nah, I've had enough ..."}]]}, 'from': {'id': 5417542090, 'is_bot': True, 'username': 'XOtenbot', 'first_name': 'xoten'}}
+2022-06-09 13:30:59,347 - telegram.bot - DEBUG - Exiting: edit_message_text
+2022-06-09 13:31:00,881 - telegram.bot - DEBUG - Getting updates: [225825540]
+2022-06-09 13:31:00,882 - telegram.bot - DEBUG - [<telegram.update.Update object at 0x7f19ff106050>]
+2022-06-09 13:31:00,882 - telegram.bot - DEBUG - Exiting: get_updates
+2022-06-09 13:31:00,882 - telegram.bot - DEBUG - Entering: get_updates
+2022-06-09 13:31:00,883 - telegram.ext.dispatcher - DEBUG - Processing Update: {'callback_query': {'data': '1', 'id': '476394840749020157', 'message': {'caption_entities': [], 'entities': [], 'date': 1654795850, 'new_chat_members': [], 'photo': [], 'supergroup_chat_created': False, 'delete_chat_photo': False, 'message_id': 18, 'edit_date': 1654795859, 'channel_chat_created': False, 'new_chat_photo': [], 'group_chat_created': False, 'chat': {'type': 'private', 'username': '', 'last_name': '', 'id': 0, 'first_name': ''}, 'text': 'Third CallbackQueryHandler. Do want to start over?', 'reply_markup': {'inline_keyboard': [[{'callback_data': '0', 'text': "Yes, let's do it again!"}, {'callback_data': '1', 'text': "Nah, I've had enough ..."}]]}, 'from': {'id': 5417542090, 'is_bot': True, 'username': 'XOtenbot', 'first_name': 'xoten'}}, 'chat_instance': '8899190500344020431', 'from': {'last_name': '', 'language_code': 'zh-hans', 'id': 0, 'is_bot': False, 'username': '', 'first_name': ''}}, 'update_id': 225825540}
+2022-06-09 13:31:00,883 - telegram.ext.conversationhandler - DEBUG - selecting conversation (0, 0) with state 1
+2022-06-09 13:31:00,884 - telegram.bot - DEBUG - Entering: answer_callback_query
+2022-06-09 13:31:01,215 - telegram.bot - DEBUG - True
+2022-06-09 13:31:01,215 - telegram.bot - DEBUG - Exiting: answer_callback_query
+2022-06-09 13:31:01,215 - telegram.bot - DEBUG - Entering: edit_message_text
+2022-06-09 13:31:01,555 - telegram.bot - DEBUG - {'caption_entities': [], 'entities': [], 'date': 1654795850, 'new_chat_members': [], 'photo': [], 'supergroup_chat_created': False, 'delete_chat_photo': False, 'message_id': 18, 'edit_date': 1654795861, 'channel_chat_created': False, 'new_chat_photo': [], 'group_chat_created': False, 'chat': {'type': 'private', 'username': '', 'last_name': '', 'id': 0, 'first_name': ''}, 'text': 'See you next time!', 'from': {'id': 5417542090, 'is_bot': True, 'username': 'XOtenbot', 'first_name': 'xoten'}}
+2022-06-09 13:31:01,556 - telegram.bot - DEBUG - Exiting: edit_message_text
+^C2022-06-09 13:31:07,788 - telegram.ext.updater - INFO - Received signal 2 (SIGINT), stopping...
+2022-06-09 13:31:07,789 - apscheduler.scheduler - INFO - Scheduler has been shut down
+
+"""

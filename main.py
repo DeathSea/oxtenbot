@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 # pylint: disable=C0116,W0613
 # This program is dedicated to the public domain under the CC0 license.
 
@@ -22,6 +23,7 @@ from telegram.ext import (
     CallbackQueryHandler,
     ConversationHandler,
     CallbackContext,
+    InlineQueryHandler
 )
 
 # Enable logging
@@ -32,9 +34,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Stages
-FIRST, SECOND = range(2)
+MAIN_MENU = 0
 # Callback data
-ONE, TWO, THREE, FOUR = range(4)
+
 
 
 def start(update: Update, context: CallbackContext) -> int:
@@ -48,15 +50,16 @@ def start(update: Update, context: CallbackContext) -> int:
     # a list (hence `[[...]]`).
     keyboard = [
         [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("2", callback_data=str(TWO)),
+            InlineKeyboardButton("❌跟机器人玩🤖", callback_data="with_rebot"),
+            InlineKeyboardButton("👥跟朋友玩⭕️", callback_data="with_human"),
+            InlineKeyboardButton("帮助", callback_data="help"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     # Send message with text and appended InlineKeyboard
-    update.message.reply_text("Start handler, Choose a route", reply_markup=reply_markup)
+    update.message.reply_text("选择选项：", reply_markup=reply_markup)
     # Tell ConversationHandler that we're in state `FIRST` now
-    return FIRST
+    return MAIN_MENU
 
 
 def start_over(update: Update, context: CallbackContext) -> int:
@@ -68,86 +71,47 @@ def start_over(update: Update, context: CallbackContext) -> int:
     query.answer()
     keyboard = [
         [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("2", callback_data=str(TWO)),
+            InlineKeyboardButton("❌跟机器人玩🤖", callback_data="with_rebot"),
+            InlineKeyboardButton("👥跟朋友玩⭕️", switch_inline_query="@XOtenbot"),
+            InlineKeyboardButton("帮助", callback_data="help"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     # Instead of sending a new message, edit the message that
     # originated the CallbackQuery. This gives the feeling of an
     # interactive menu.
-    query.edit_message_text(text="Start handler, Choose a route", reply_markup=reply_markup)
-    return FIRST
+    query.edit_message_text(text="选择选项：", reply_markup=reply_markup)
+    return MAIN_MENU
 
 
-def one(update: Update, context: CallbackContext) -> int:
+def with_rebot(update: Update, context: CallbackContext) -> int:
     """Show new choice of buttons"""
     query = update.callback_query
     query.answer()
     keyboard = [
         [
-            InlineKeyboardButton("3", callback_data=str(THREE)),
-            InlineKeyboardButton("4", callback_data=str(FOUR)),
+            InlineKeyboardButton("返回", callback_data="main"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(
-        text="First CallbackQueryHandler, Choose a route", reply_markup=reply_markup
+        text="❌还没实现！❌", reply_markup=reply_markup
     )
-    return FIRST
+    return MAIN_MENU
 
-
-def two(update: Update, context: CallbackContext) -> int:
-    """Show new choice of buttons"""
+def help_msg(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     query.answer()
     keyboard = [
         [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("3", callback_data=str(THREE)),
+            InlineKeyboardButton("返回", callback_data="main"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(
-        text="Second CallbackQueryHandler, Choose a route", reply_markup=reply_markup
+        text="一段说明文字。。", reply_markup=reply_markup
     )
-    return FIRST
-
-
-def three(update: Update, context: CallbackContext) -> int:
-    """Show new choice of buttons"""
-    query = update.callback_query
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("Yes, let's do it again!", callback_data=str(ONE)),
-            InlineKeyboardButton("Nah, I've had enough ...", callback_data=str(TWO)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Third CallbackQueryHandler. Do want to start over?", reply_markup=reply_markup
-    )
-    # Transfer to conversation state `SECOND`
-    return SECOND
-
-
-def four(update: Update, context: CallbackContext) -> int:
-    """Show new choice of buttons"""
-    query = update.callback_query
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("2", callback_data=str(TWO)),
-            InlineKeyboardButton("3", callback_data=str(THREE)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Fourth CallbackQueryHandler, Choose a route", reply_markup=reply_markup
-    )
-    return FIRST
-
+    return MAIN_MENU
 
 def end(update: Update, context: CallbackContext) -> int:
     """Returns `ConversationHandler.END`, which tells the
@@ -155,8 +119,40 @@ def end(update: Update, context: CallbackContext) -> int:
     """
     query = update.callback_query
     query.answer()
-    query.edit_message_text(text="See you next time!")
+    query.edit_message_text(text="bye bye!")
     return ConversationHandler.END
+
+
+def inlinequery(update: Update, context: CallbackContext) -> None:
+    """Handle the inline query."""
+    query = update.inline_query.query
+
+    if query == "":
+        return
+
+    results = [
+        InlineQueryResultArticle(
+            id=str(uuid4()),
+            title="Caps",
+            input_message_content=InputTextMessageContent(query.upper()),
+        ),
+        InlineQueryResultArticle(
+            id=str(uuid4()),
+            title="Bold",
+            input_message_content=InputTextMessageContent(
+                f"*{escape_markdown(query)}*", parse_mode=ParseMode.MARKDOWN
+            ),
+        ),
+        InlineQueryResultArticle(
+            id=str(uuid4()),
+            title="Italic",
+            input_message_content=InputTextMessageContent(
+                f"_{escape_markdown(query)}_", parse_mode=ParseMode.MARKDOWN
+            ),
+        ),
+    ]
+
+    update.inline_query.answer(results)
 
 
 def main() -> None:
@@ -175,16 +171,18 @@ def main() -> None:
     # So ^ABC$ will only allow 'ABC'
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
-        states={
+        MAIN_MENU={
             FIRST: [
-                CallbackQueryHandler(one, pattern='^' + str(ONE) + '$'),
-                CallbackQueryHandler(two, pattern='^' + str(TWO) + '$'),
-                CallbackQueryHandler(three, pattern='^' + str(THREE) + '$'),
-                CallbackQueryHandler(four, pattern='^' + str(FOUR) + '$'),
+                CallbackQueryHandler(with_rebot, pattern='^with_rebot$'),
+                CallbackQueryHandler(help_msg, pattern='^help$'),
+                CallbackQueryHandler(start_over, pattern='^main$'),
+                # CallbackQueryHandler(two, pattern='^' + str(TWO) + '$'),
+                # CallbackQueryHandler(three, pattern='^' + str(THREE) + '$'),
+                # CallbackQueryHandler(four, pattern='^' + str(FOUR) + '$'),
             ],
             SECOND: [
-                CallbackQueryHandler(start_over, pattern='^' + str(ONE) + '$'),
-                CallbackQueryHandler(end, pattern='^' + str(TWO) + '$'),
+                CallbackQueryHandler(start_over, pattern='^restart$'),
+                CallbackQueryHandler(end, pattern='^end$'),
             ],
         },
         fallbacks=[CommandHandler('start', start)],
@@ -192,6 +190,7 @@ def main() -> None:
 
     # Add ConversationHandler to dispatcher that will be used for handling updates
     dispatcher.add_handler(conv_handler)
+    dispatcher.add_handler(InlineQueryHandler(inlinequery))
 
     # Start the Bot
     updater.start_polling()
