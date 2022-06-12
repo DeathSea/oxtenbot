@@ -16,7 +16,8 @@ Send /start to initiate the conversation.
 Press Ctrl-C on the command line to stop the bot.
 """
 import logging
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from uuid import uuid4
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -39,6 +40,17 @@ GAME = 1
 # Callback data
 
 
+main_menu_keyboard = [
+    [
+        InlineKeyboardButton("❌跟机器人玩🤖", callback_data="with_rebot"),
+    ],
+    [
+        InlineKeyboardButton("👥跟朋友玩⭕️", switch_inline_query="@XOtenbot"),
+    ],
+    [
+        InlineKeyboardButton("帮助", callback_data="help"),
+    ],
+]
 
 def start(update: Update, context: CallbackContext) -> int:
     """Send message on `/start`."""
@@ -49,14 +61,7 @@ def start(update: Update, context: CallbackContext) -> int:
     # and a string as callback_data
     # The keyboard is a list of button rows, where each row is in turn
     # a list (hence `[[...]]`).
-    keyboard = [
-        [
-            InlineKeyboardButton("❌跟机器人玩🤖", callback_data="with_rebot"),
-            InlineKeyboardButton("👥跟朋友玩⭕️", switch_inline_query="@XOtenbot"),
-            InlineKeyboardButton("帮助", callback_data="help"),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    reply_markup = InlineKeyboardMarkup(main_menu_keyboard)
     # Send message with text and appended InlineKeyboard
     update.message.reply_text("选择选项：", reply_markup=reply_markup)
     # Tell ConversationHandler that we're in state `FIRST` now
@@ -70,14 +75,8 @@ def start_over(update: Update, context: CallbackContext) -> int:
     # CallbackQueries need to be answered, even if no notification to the user is needed
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("❌跟机器人玩🤖", callback_data="with_rebot"),
-            InlineKeyboardButton("👥跟朋友玩⭕️", switch_inline_query="@XOtenbot"),
-            InlineKeyboardButton("帮助", callback_data="help"),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    reply_markup = InlineKeyboardMarkup(main_menu_keyboard)
     # Instead of sending a new message, edit the message that
     # originated the CallbackQuery. This gives the feeling of an
     # interactive menu.
@@ -124,36 +123,44 @@ def end(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
+big_ox_game_keyboard = [
+    [
+        InlineKeyboardButton("⬜️", callback_data="big_1_1"),InlineKeyboardButton("⬜️", callback_data="big_1_2"),InlineKeyboardButton("⬜️", callback_data="big_1_3")
+    ],
+    [
+        InlineKeyboardButton("⬜️", callback_data="big_2_1"),InlineKeyboardButton("⬜️", callback_data="big_2_2"),InlineKeyboardButton("⬜️", callback_data="big_2_2")
+    ],
+    [
+        InlineKeyboardButton("⬜️", callback_data="big_3_1"),InlineKeyboardButton("⬜️", callback_data="big_3_2"),InlineKeyboardButton("⬜️", callback_data="big_3_3")
+    ],
+]
+
 def inlinequery(update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
     query = update.inline_query.query
 
-    if query == "":
-        return
-
     results = [
         InlineQueryResultArticle(
             id=str(uuid4()),
-            title="Caps",
-            input_message_content=InputTextMessageContent(query.upper()),
+            title="❌",
+            input_message_content=InputTextMessageContent("测试"),
+            reply_markup = big_ox_game_keyboard
         ),
         InlineQueryResultArticle(
             id=str(uuid4()),
-            title="Bold",
-            input_message_content=InputTextMessageContent(
-                f"*{escape_markdown(query)}*", parse_mode=ParseMode.MARKDOWN
-            ),
-        ),
-        InlineQueryResultArticle(
-            id=str(uuid4()),
-            title="Italic",
-            input_message_content=InputTextMessageContent(
-                f"_{escape_markdown(query)}_", parse_mode=ParseMode.MARKDOWN
-            ),
+            title="⭕️",
+            input_message_content=InputTextMessageContent("另一个"),
+            reply_markup = big_ox_game_keyboard
         ),
     ]
 
     update.inline_query.answer(results)
+
+def big_table(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    log.DEBUG(dir(context))
+    query.edit_message_text(text="11111")
+    return GAME
 
 
 def main() -> None:
@@ -177,6 +184,7 @@ def main() -> None:
                 CallbackQueryHandler(with_rebot, pattern='^with_rebot$'),
                 CallbackQueryHandler(help_msg, pattern='^help$'),
                 CallbackQueryHandler(start_over, pattern='^main$'),
+                CallbackQueryHandler(big_table, pattern='^big_(\d)_(\d)'),
                 # CallbackQueryHandler(two, pattern='^' + str(TWO) + '$'),
                 # CallbackQueryHandler(three, pattern='^' + str(THREE) + '$'),
                 # CallbackQueryHandler(four, pattern='^' + str(FOUR) + '$'),
