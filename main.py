@@ -52,7 +52,7 @@ def start(update: Update, context: CallbackContext) -> int:
     keyboard = [
         [
             InlineKeyboardButton("❌跟机器人玩🤖", callback_data="with_rebot"),
-            InlineKeyboardButton("👥跟朋友玩⭕️", callback_data="with_human"),
+            InlineKeyboardButton("👥跟朋友玩⭕️", switch_inline_query="@XOtenbot"),
             InlineKeyboardButton("帮助", callback_data="help"),
         ]
     ]
