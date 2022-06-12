@@ -42,7 +42,7 @@ GAME = 1
 
 main_menu_keyboard = [
     [
-        InlineKeyboardButton("❌跟机器人玩🤖", callback_data="with_rebot"),
+        InlineKeyboardButton("❌跟机器人玩🤖", callback_data="with_robot"),
     ],
     [
         InlineKeyboardButton("👥跟朋友玩⭕️", switch_inline_query="@XOtenbot"),
@@ -84,7 +84,7 @@ def start_over(update: Update, context: CallbackContext) -> int:
     return MAIN_MENU
 
 
-def with_rebot(update: Update, context: CallbackContext) -> int:
+def with_robot(update: Update, context: CallbackContext) -> int:
     """Show new choice of buttons"""
     query = update.callback_query
     query.answer()
@@ -144,13 +144,13 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
             id=str(uuid4()),
             title="❌",
             input_message_content=InputTextMessageContent("测试"),
-            reply_markup = big_ox_game_keyboard
+            reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard)
         ),
         InlineQueryResultArticle(
             id=str(uuid4()),
             title="⭕️",
             input_message_content=InputTextMessageContent("另一个"),
-            reply_markup = big_ox_game_keyboard
+            reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard)
         ),
     ]
 
@@ -181,7 +181,7 @@ def main() -> None:
         entry_points=[CommandHandler('start', start)],
         states={
             MAIN_MENU: [
-                CallbackQueryHandler(with_rebot, pattern='^with_rebot$'),
+                CallbackQueryHandler(with_robot, pattern='^with_robot$'),
                 CallbackQueryHandler(help_msg, pattern='^help$'),
                 CallbackQueryHandler(start_over, pattern='^main$'),
                 CallbackQueryHandler(big_table, pattern='^big_(\d)_(\d)'),
