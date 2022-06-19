@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 # pylint: disable=C0116,W0613
 # This program is dedicated to the public domain under the CC0 license.
@@ -158,8 +158,8 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
 
 def big_table(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
-    log.DEBUG(dir(context))
-    query.edit_message_text(text="11111")
+    query.edit_message_text(text="11111",
+        reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard))
     return GAME
 
 
@@ -184,7 +184,6 @@ def main() -> None:
                 CallbackQueryHandler(with_robot, pattern='^with_robot$'),
                 CallbackQueryHandler(help_msg, pattern='^help$'),
                 CallbackQueryHandler(start_over, pattern='^main$'),
-                CallbackQueryHandler(big_table, pattern='^big_(\d)_(\d)'),
                 # CallbackQueryHandler(two, pattern='^' + str(TWO) + '$'),
                 # CallbackQueryHandler(three, pattern='^' + str(THREE) + '$'),
                 # CallbackQueryHandler(four, pattern='^' + str(FOUR) + '$'),
@@ -200,6 +199,7 @@ def main() -> None:
     # Add ConversationHandler to dispatcher that will be used for handling updates
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(InlineQueryHandler(inlinequery))
+    dispatcher.add_handler(CallbackQueryHandler(big_table, pattern="^big_\d_\d"))
 
     # Start the Bot
     updater.start_polling()
