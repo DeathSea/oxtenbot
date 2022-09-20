@@ -26,6 +26,7 @@ from telegram.ext import (
     CallbackContext,
     InlineQueryHandler
 )
+from ten import ten
 
 # Enable logging
 logging.basicConfig(
