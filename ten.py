@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 import logging,os
 from typing import List,Tuple
-LOG_FILE = "ten.log"
-logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG)
+# LOG_FILE = "ten.log"
+# logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG)
 
 player1 = 1
 player2 = 2

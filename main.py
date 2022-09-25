@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 # pylint: disable=C0116,W0613
 # This program is dedicated to the public domain under the CC0 license.
@@ -17,7 +17,7 @@ Press Ctrl-C on the command line to stop the bot.
 """
 import logging
 from uuid import uuid4
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InlineQueryResultArticle, InputTextMessageContent
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InlineQueryResultPhoto
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -26,7 +26,7 @@ from telegram.ext import (
     CallbackContext,
     InlineQueryHandler
 )
-from ten import ten
+from tg_ten import tg_ten
 
 # Enable logging
 logging.basicConfig(
@@ -139,19 +139,32 @@ big_ox_game_keyboard = [
 def inlinequery(update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
     query = update.inline_query.query
+    
+    tgten = tg_ten()
+
+    keyboard = []
+    for i in range(3):
+        l = []
+        for j in range(3):
+            l.append(InlineKeyboardButton("", callback_data=(tgten, (i, j))))
+        keyboard.append(l)
 
     results = [
-        InlineQueryResultArticle(
+        InlineQueryResultPhoto(
             id=str(uuid4()),
-            title="❌",
-            input_message_content=InputTextMessageContent("测试"),
-            reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard)
-        ),
-        InlineQueryResultArticle(
-            id=str(uuid4()),
+            photo_url="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
+            thumb_url="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
             title="⭕️",
-            input_message_content=InputTextMessageContent("另一个"),
-            reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard)
+            description="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
+            reply_markup = InlineKeyboardMarkup(keyboard)
+        ),
+        InlineQueryResultPhoto(
+            id=str(uuid4()),
+            photo_url="https://telegra.ph/file/73bf938912c533307874d.png",
+            thumb_url="https://telegra.ph/file/73bf938912c533307874d.png",
+            title="❌",
+            description="https://telegra.ph/file/73bf938912c533307874d.png",
+            reply_markup = InlineKeyboardMarkup(keyboard)
         ),
     ]
 
@@ -163,6 +176,13 @@ def big_table(update: Update, context: CallbackContext) -> int:
         reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard))
     return GAME
 
+def test(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    print(update)
+    print(query)
+    query.edit_message_text(text="test",
+        reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard))
+    return 1;
 
 def main() -> None:
     """Run the bot."""
@@ -201,6 +221,7 @@ def main() -> None:
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(InlineQueryHandler(inlinequery))
     dispatcher.add_handler(CallbackQueryHandler(big_table, pattern="^big_\d_\d"))
+    dispatcher.add_handler(CallbackQueryHandler(test, pattern=type(tuple)))
 
     # Start the Bot
     updater.start_polling()
