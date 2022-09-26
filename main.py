@@ -17,7 +17,7 @@ Press Ctrl-C on the command line to stop the bot.
 """
 import logging
 from uuid import uuid4
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InlineQueryResultPhoto
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InlineQueryResultPhoto, InputTextMessageContent
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -146,8 +146,10 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
     for i in range(3):
         l = []
         for j in range(3):
-            l.append(InlineKeyboardButton("", callback_data=(tgten, (i, j))))
+            l.append(InlineKeyboardButton("⬜️", callback_data=(tgten, (i, j))))
         keyboard.append(l)
+    
+    username = update.inline_query.from_user.first_name
 
     results = [
         InlineQueryResultPhoto(
@@ -156,7 +158,8 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
             thumb_url="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
             title="⭕️",
             description="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            reply_markup = InlineKeyboardMarkup(keyboard),
+            input_message_content=InputTextMessageContent(f"❌ ? 👈\n⭕️ {username}")
         ),
         InlineQueryResultPhoto(
             id=str(uuid4()),
@@ -164,7 +167,8 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
             thumb_url="https://telegra.ph/file/73bf938912c533307874d.png",
             title="❌",
             description="https://telegra.ph/file/73bf938912c533307874d.png",
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            reply_markup = InlineKeyboardMarkup(keyboard),
+            input_message_content = InputTextMessageContent(f"❌ {username} 👈\n⭕️ ?")
         ),
     ]
 
@@ -221,7 +225,8 @@ def main() -> None:
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(InlineQueryHandler(inlinequery))
     dispatcher.add_handler(CallbackQueryHandler(big_table, pattern="^big_\d_\d"))
-    dispatcher.add_handler(CallbackQueryHandler(test, pattern=type(tuple)))
+    dispatcher.add_handler(CallbackQueryHandler(test, pattern=tuple))
+    #dispatcher.add_handler(CallbackQueryHandler(test))
 
     # Start the Bot
     updater.start_polling()
