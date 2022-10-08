@@ -26,11 +26,11 @@ from telegram.ext import (
     CallbackContext,
     InlineQueryHandler
 )
-from tg_ten import tg_ten
+from tg_ten import tg_ten,TEN_PLAYER_1,TEN_PLAYER_2
 
 # Enable logging
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG
 )
 
 logger = logging.getLogger(__name__)
@@ -138,55 +138,55 @@ big_ox_game_keyboard = [
 
 def inlinequery(update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
-    query = update.inline_query.query
-    
+    query = update.inline_query
+    username = query.from_user.first_name
+
     tgten = tg_ten()
 
-    keyboard = []
+    x_keyboard = []
+    o_keyboard = []
     for i in range(3):
         l = []
+        ll = []
         for j in range(3):
-            l.append(InlineKeyboardButton("⬜️", callback_data=(tgten, (i, j))))
-        keyboard.append(l)
+            l.append(InlineKeyboardButton("⬜️", callback_data=(tgten, (i, j), (query.from_user, TEN_PLAYER_2))))
+            ll.append(InlineKeyboardButton("⬜️", callback_data=(tgten, (i, j), (TEN_PLAYER_1, query.from_user))))
+        x_keyboard.append(l)
+        o_keyboard.append(ll)
     
-    username = update.inline_query.from_user.first_name
-
     results = [
-        InlineQueryResultPhoto(
-            id=str(uuid4()),
-            photo_url="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
-            thumb_url="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
-            title="⭕️",
-            description="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
-            reply_markup = InlineKeyboardMarkup(keyboard),
-            input_message_content=InputTextMessageContent(f"❌ ? 👈\n⭕️ {username}")
-        ),
         InlineQueryResultPhoto(
             id=str(uuid4()),
             photo_url="https://telegra.ph/file/73bf938912c533307874d.png",
             thumb_url="https://telegra.ph/file/73bf938912c533307874d.png",
             title="❌",
             description="https://telegra.ph/file/73bf938912c533307874d.png",
-            reply_markup = InlineKeyboardMarkup(keyboard),
-            input_message_content = InputTextMessageContent(f"❌ {username} 👈\n⭕️ ?")
+            reply_markup = InlineKeyboardMarkup(x_keyboard),
+            input_message_content = InputTextMessageContent(f"❌ {username} 👈\n⭕️ ?\n全局棋局：\n{tgten.tg_global_state()}\n当前棋局：\n{tgten.tg_all_state()}\n请选择大棋盘：")
+        ),
+        InlineQueryResultPhoto(
+            id=str(uuid4()),
+            photo_url="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
+            thumb_url="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
+            title="⭕️",
+            description="https://telegra.ph/file/ea9e9b7873bc6960d102e.png",
+            reply_markup = InlineKeyboardMarkup(o_keyboard),
+            input_message_content=InputTextMessageContent(f"❌ ? 👈\n⭕️ {username}\n全局棋局：\n{tgten.tg_global_state()}\n当前棋局：\n{tgten.tg_all_state()}\n请选择大棋盘：")
         ),
     ]
 
     update.inline_query.answer(results)
 
-def big_table(update: Update, context: CallbackContext) -> int:
+def game_start(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
-    query.edit_message_text(text="11111",
+    tgten = query.data[0]
+    location = query.data[1]
+    play = query.data[2]
+    player1_name = str(play[0])
+    player2_name = str(play[1])
+    query.edit_message_text(text=f"❌ {player1_name} 👈\n⭕️ {player2_name}\n全局棋局：\n{tgten.tg_global_state()}\n当前棋局：\n{tgten.tg_all_state()}\n请选择小棋盘：",
         reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard))
-    return GAME
-
-def test(update: Update, context: CallbackContext) -> int:
-    query = update.callback_query
-    print(update)
-    print(query)
-    query.edit_message_text(text="test",
-        reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard))
-    return 1;
+    return 1
 
 def main() -> None:
     """Run the bot."""
@@ -224,8 +224,7 @@ def main() -> None:
     # Add ConversationHandler to dispatcher that will be used for handling updates
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(InlineQueryHandler(inlinequery))
-    dispatcher.add_handler(CallbackQueryHandler(big_table, pattern="^big_\d_\d"))
-    dispatcher.add_handler(CallbackQueryHandler(test, pattern=tuple))
+    dispatcher.add_handler(CallbackQueryHandler(game_start, pattern=type(())))
     #dispatcher.add_handler(CallbackQueryHandler(test))
 
     # Start the Bot

@@ -5,8 +5,8 @@ from typing import List,Tuple
 # LOG_FILE = "ten.log"
 # logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG)
 
-player1 = 1
-player2 = 2
+TEN_PLAYER_1 = 1
+TEN_PLAYER_2 = 2
 
 player1_win = 0x010101
 player2_win = 0x020202
@@ -16,12 +16,12 @@ keep_going = 0x000000
 
 class ten(object):
     def __init__(self):
-        self.global_state = [
+        self._global_state = [
             [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0],
         ]
-        self.all_state = [
+        self._all_state = [
             [[[0,0,0], [0,0,0], [0,0,0]], [[0,0,0], [0,0,0], [0,0,0]], [[0,0,0], [0,0,0], [0,0,0]]],
             [[[0,0,0], [0,0,0], [0,0,0]], [[0,0,0], [0,0,0], [0,0,0]], [[0,0,0], [0,0,0], [0,0,0]]],
             [[[0,0,0], [0,0,0], [0,0,0]], [[0,0,0], [0,0,0], [0,0,0]], [[0,0,0], [0,0,0], [0,0,0]]],
@@ -76,27 +76,27 @@ class ten(object):
         return keep_going
 
     def game_state_check(self, local : List[int]):
-        t = self.all_state[local[0]][local[1]]
+        t = self._all_state[local[0]][local[1]]
         # 小棋盘是否已被占领
         c = self.check_board_state(t)
         if c != keep_going:
             if c == player2_win:
-                c = player2
+                c = TEN_PLAYER_2
             elif c == player1_win:
-                c = player1
+                c = TEN_PLAYER_1
             else:
                 c = 0xf # 平手填f
-            self.global_state[local[0]][local[1]] = c
-        return self.check_board_state(self.global_state)
+            self._global_state[local[0]][local[1]] = c
+        return self.check_board_state(self._global_state)
 
     def play(self, player : int, local : List[int], move : List[int]):
 
-        if self.global_state[local[0]][local[1]] != 0:
+        if self._global_state[local[0]][local[1]] != 0:
             return ([-1, -1], inv_move)
 
-        if self.all_state[local[0]][local[1]][move[0]][move[1]] != 0:
+        if self._all_state[local[0]][local[1]][move[0]][move[1]] != 0:
             return ([-1, -1], inv_move)
-        self.all_state[local[0]][local[1]][move[0]][move[1]] = player
+        self._all_state[local[0]][local[1]][move[0]][move[1]] = player
         r = self.game_state_check(local)
 
         # 游戏结束
@@ -104,14 +104,14 @@ class ten(object):
             return ([0, 0], r)
 
         # 给予对手的下一步不可走，对手随意挑选小棋盘走，
-        if self.global_state[move[0]][move[1]] != 0:
+        if self._global_state[move[0]][move[1]] != 0:
             return ([-1, -1], 0)
 
         # 否则必须走对手给予的一步
         return (move, 0)
 
     def print_all_state(self):
-        for R in self.all_state:
+        for R in self._all_state:
             for r in range(0,3):
                 print(R[0][r][0], R[0][r][1], R[0][r][2], end=" | ")
                 print(R[1][r][0], R[1][r][1], R[1][r][2], end=" | ")
@@ -119,22 +119,22 @@ class ten(object):
             print("═════════════════════")
 
     def print_global_state(self):
-        for r in self.global_state:
+        for r in self._global_state:
             for c in r:
                 print(c, end = " ")
             print()
 
     @property
     def set_all_state(self, state : List[List[List[List[int]]]]):
-        self.all_state = state
+        self._all_state = state
     
     @property
-    def get_global_state(self):
-        return self.global_state
+    def global_state(self):
+        return self._global_state
     
     @property
-    def get_all_state(self):
-        return self.all_state
+    def all_state(self):
+        return self._all_state
     
 
 
