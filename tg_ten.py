@@ -1,4 +1,4 @@
-from ten import ten,TEN_PLAYER_1,TEN_PLAYER_2
+from ten import ten,TEN_PLAYER_1,TEN_PLAYER_2,TEN_ALL_FILL,TEN_INV_MOVE,TEN_KEEP_GOING,TEN_PLAYER1_WIN,TEN_PLAYER2_WIN,TEN_INV_PLAYER
 
 from typing import List
 
@@ -9,8 +9,7 @@ class tg_ten(ten):
         self._player2_id = 0
         self.state = 0
 
-        self.cur_player = 0
-        self.cur_location = [0, 0]
+        self._location = [-1, -1]
 
     @property
     def player1_id(self):
@@ -22,18 +21,25 @@ class tg_ten(ten):
 
     @property
     def player2_id(self):
-        return self.player2_id
+        return self._player2_id
 
     @player2_id.setter
     def player2_id(self, player2_id : int):
         self._player2_id = player2_id
     
-    def set_cur_player_and_location(self, playerid: int, location: List[int]):
-        self.cur_player = TEN_PLAYER_1 if playerid == self.player1_id else TEN_PLAYER_2
-        self.cur_location = location
+    @property
+    def location(self):
+        return self._location
 
-    def set_cur_move(self, move : List[int]):
-        return self.play(self.cur_player, self.cur_location, move)
+    @location.setter
+    def location(self, location: List[int]):
+        self._location = location
+
+    def clear_location(self):
+        self._location = [-1, -1]
+
+    def set_cur_move(self, cur_player : int, move : List[int]):
+        return self.play(TEN_PLAYER_1 if cur_player == self.player1_id else TEN_PLAYER_2, self._location, move)
 
     def get_tg_tag(self, player):
         t = "⬜️"
@@ -71,3 +77,10 @@ class tg_ten(ten):
                 result.append(self.get_tg_tag(R[2][r][2]))
                 result.append("\n")
         return "".join(result)
+
+    @property
+    def cur_player(self):
+        ten_player = super().cur_player
+        if ten_player == TEN_PLAYER_1:
+            return self.player1_id
+        return self.player2_id

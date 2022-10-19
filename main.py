@@ -17,16 +17,17 @@ Press Ctrl-C on the command line to stop the bot.
 """
 import logging
 from uuid import uuid4
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InlineQueryResultPhoto, InputTextMessageContent
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, InlineQueryResultPhoto, InputTextMessageContent, User
 from telegram.ext import (
     Updater,
     CommandHandler,
     CallbackQueryHandler,
     ConversationHandler,
     CallbackContext,
-    InlineQueryHandler
+    InlineQueryHandler,
+    InvalidCallbackData
 )
-from tg_ten import tg_ten,TEN_PLAYER_1,TEN_PLAYER_2
+from tg_ten import tg_ten,TEN_PLAYER_1,TEN_PLAYER_2,TEN_ALL_FILL,TEN_INV_MOVE,TEN_KEEP_GOING,TEN_PLAYER1_WIN,TEN_PLAYER2_WIN,TEN_INV_PLAYER
 
 # Enable logging
 logging.basicConfig(
@@ -123,18 +124,13 @@ def end(update: Update, context: CallbackContext) -> int:
     query.edit_message_text(text="bye bye!")
     return ConversationHandler.END
 
-
-big_ox_game_keyboard = [
-    [
-        InlineKeyboardButton("⬜️", callback_data="big_1_1"),InlineKeyboardButton("⬜️", callback_data="big_1_2"),InlineKeyboardButton("⬜️", callback_data="big_1_3")
-    ],
-    [
-        InlineKeyboardButton("⬜️", callback_data="big_2_1"),InlineKeyboardButton("⬜️", callback_data="big_2_2"),InlineKeyboardButton("⬜️", callback_data="big_2_2")
-    ],
-    [
-        InlineKeyboardButton("⬜️", callback_data="big_3_1"),InlineKeyboardButton("⬜️", callback_data="big_3_2"),InlineKeyboardButton("⬜️", callback_data="big_3_3")
-    ],
-]
+GAME_STATE_A = 1
+GAME_STATE_B = 2
+GAME_STATE_C = 3
+GAME_STATE_D = 4
+GAME_STATE_E = 5
+GAME_STATE_F = 6
+GAME_STATE_G = 7
 
 def inlinequery(update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
@@ -149,8 +145,8 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
         l = []
         ll = []
         for j in range(3):
-            l.append(InlineKeyboardButton("⬜️", callback_data=(tgten, (i, j), (query.from_user, TEN_PLAYER_2))))
-            ll.append(InlineKeyboardButton("⬜️", callback_data=(tgten, (i, j), (TEN_PLAYER_1, query.from_user))))
+            l.append(InlineKeyboardButton("⬜️", callback_data=(tgten, (i, j), (query.from_user, TEN_PLAYER_2), GAME_STATE_B)))
+            ll.append(InlineKeyboardButton("⬜️", callback_data=(tgten, (i, j), (TEN_PLAYER_1, query.from_user), GAME_STATE_C)))
         x_keyboard.append(l)
         o_keyboard.append(ll)
     
@@ -177,15 +173,121 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
 
     update.inline_query.answer(results)
 
+#
+#  state\action                    |            player 1 select               |                player 2 select          | other player 
+# state A game start init          |                   A                      |                    B                    |     B
+# state B player 1 start play      |                   D                      |                    F                    |     F
+# state C player 2 start play      |                   F                      |                    E                    |     F
+# state D player 1 continue select | full -> C, no full -> E, game over -> G  |                    F                    |     F
+# state E player 2 continue select |                   F                      | full -> B, no full -> D, game over -> G |     F
+# state F invalid move             |
+# state G game over                |
 def game_start(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     tgten = query.data[0]
     location = query.data[1]
     play = query.data[2]
-    player1_name = str(play[0])
-    player2_name = str(play[1])
-    query.edit_message_text(text=f"❌ {player1_name} 👈\n⭕️ {player2_name}\n全局棋局：\n{tgten.tg_global_state()}\n当前棋局：\n{tgten.tg_all_state()}\n请选择小棋盘：",
-        reply_markup = InlineKeyboardMarkup(big_ox_game_keyboard))
+    game_state = query.data[3]
+
+    if type(play[0]) != User and type(play[1]) != User:
+        query.answer("内部错误", show_alert=True)
+        return
+
+    player1_name = "?"
+    if type(play[0]) == User:
+        player1_name = play[0].first_name + " " + "👈" if tgten.cur_player == play[0].id else ""
+    player2_name = "?"
+    if type(play[1]) == User:
+        player2_name = play[1].first_name + " " + "👈" if tgten.cur_player == play[1].id else ""
+
+    operation_user = query.from_user
+
+    if game_state == GAME_STATE_B or game_state == GAME_STATE_C:
+        if operation_user == play[0] or operation_user == play[1]:
+            if tgten.global_state[location[0]][location[1]] != 0:
+                query.edit_message_text("不能走这")
+                query.answer()
+                return
+            next_game_state = GAME_STATE_D if operation_user == play[0] else GAME_STATE_E
+            tgten.location = location
+            keyboard = []
+            for i in range(3):
+                l = []
+                for j in range(3):
+                    l.append(InlineKeyboardButton(tgten.get_tg_tag(tgten.all_state[location[0]][location[1]][i][j]), callback_data=(tgten, (i, j), play, next_game_state)))
+                keyboard.append(l)
+
+            query.edit_message_text(text=f"❌ {player1_name}\n⭕️ {player2_name}\n全局棋局：\n{tgten.tg_global_state()}\n当前棋局：\n{tgten.tg_all_state()}\n请选择小棋盘：",
+                reply_markup = InlineKeyboardMarkup(keyboard))
+            query.answer()
+        else:
+            query.answer("你不能走！", show_alert=True)
+    elif game_state == GAME_STATE_D or game_state == GAME_STATE_E:
+        if game_state == GAME_STATE_D and operation_user != play[0] and type(play[0]) == User:
+            query.answer("你不能走！", show_alert=True)
+            return
+        if game_state == GAME_STATE_E and operation_user != play[1] and type(play[1]) == User:
+            query.answer("你不能走！", show_alert=True)
+            return 
+        if operation_user != play[0] and operation_user != play[1]:
+            query.answer("你不能走！", show_alert=True)
+            return
+
+        if type(play[0]) != User and game_state == GAME_STATE_D:
+            play = (operation_user, play[1])
+        if type(play[1]) != User and game_state == GAME_STATE_E:
+            play = (play[0], operation_user)
+
+        (next_location, state) = tgten.set_cur_move(query.from_user.id, location)
+        if state == TEN_PLAYER1_WIN or state == TEN_PLAYER2_WIN:
+            query.edit_message_text(f"游戏结束，玩家{player1_name if state == TEN_PLAYER1_WIN else player2_name}赢了")
+            query.answer()
+            return
+        if state == TEN_INV_MOVE or state == TEN_INV_PLAYER:
+            query.answer("不能走这",show_alert=True)
+            return
+        if state == TEN_ALL_FILL:
+            query.edit_message_text(f"游戏结束，没有赢家")
+            query.answer()
+            return
+
+
+        player1_name = "?"
+        if type(play[0]) == User:
+            player1_name = play[0].first_name + " " + "👈" if tgten.cur_player == play[0].id else ""
+        player2_name = "?"
+        if type(play[1]) == User:
+            player2_name = play[1].first_name + " " + "👈" if tgten.cur_player == play[1].id else ""
+
+        if next_location == [-1, -1]:
+            next_game_state = GAME_STATE_B if operation_user == play[1] else GAME_STATE_C
+            keyboard = []
+            for i in range(3):
+                l = []
+                for j in range(3):
+                    l.append(InlineKeyboardButton(tgten.get_tg_tag(tgten.global_state[i][j]), callback_data=(tgten, (i, j), play, next_game_state)))
+                keyboard.append(l)
+
+            query.edit_message_text(text=f"❌ {player1_name}\n⭕️ {player2_name}\n全局棋局：\n{tgten.tg_global_state()}\n当前棋局：\n{tgten.tg_all_state()}\n下一步不可用，请选择大棋盘：",
+                reply_markup = InlineKeyboardMarkup(keyboard))
+            query.answer()
+            return
+        else:
+            tgten.location = next_location
+            already_select = f"你只能走在第{tgten.location[0] + 1}, {tgten.location[1] + 1}格大棋盘上\n";
+
+            next_game_state = GAME_STATE_E if operation_user == play[0] else GAME_STATE_D
+            keyboard = []
+            for i in range(3):
+                l = []
+                for j in range(3):
+                    l.append(InlineKeyboardButton(tgten.get_tg_tag(tgten.all_state[location[0]][location[1]][i][j]), callback_data=(tgten, (i, j), play, next_game_state)))
+                keyboard.append(l)
+
+            query.edit_message_text(text=f"❌ {player1_name}\n⭕️ {player2_name}\n全局棋局：\n{tgten.tg_global_state()}\n当前棋局：\n{tgten.tg_all_state()}\n{already_select}请选择小棋盘：",
+                reply_markup = InlineKeyboardMarkup(keyboard))
+            query.answer()
+
     return 1
 
 def main() -> None:
@@ -225,6 +327,7 @@ def main() -> None:
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(InlineQueryHandler(inlinequery))
     dispatcher.add_handler(CallbackQueryHandler(game_start, pattern=type(())))
+    dispatcher.add_handler(CallbackQueryHandler(lambda u,c:u.callback_query.answer(text='Button is no longer valid', show_alert=True), pattern=InvalidCallbackData))
     #dispatcher.add_handler(CallbackQueryHandler(test))
 
     # Start the Bot
