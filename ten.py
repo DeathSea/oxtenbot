@@ -92,6 +92,13 @@ class ten(object):
         return self.check_board_state(self._global_state)
 
     def play(self, player : int, local : List[int], move : List[int]):
+
+        if self._global_state[local[0]][local[1]] != 0:
+            return ([-1, -1], TEN_INV_MOVE)
+
+        if self._all_state[local[0]][local[1]][move[0]][move[1]] != 0:
+            return ([-1, -1], TEN_INV_MOVE)
+
         if self._cur_player == 0:
             self._cur_player = player
         elif self._cur_player == TEN_PLAYER_1:
@@ -103,11 +110,6 @@ class ten(object):
                 return ([-1, -1], TEN_INV_PLAYER)
             self._cur_player = TEN_PLAYER_1
 
-        if self._global_state[local[0]][local[1]] != 0:
-            return ([-1, -1], TEN_INV_MOVE)
-
-        if self._all_state[local[0]][local[1]][move[0]][move[1]] != 0:
-            return ([-1, -1], TEN_INV_MOVE)
         self._all_state[local[0]][local[1]][move[0]][move[1]] = player
         r = self.game_state_check(local)
 

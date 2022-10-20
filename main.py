@@ -195,18 +195,23 @@ def game_start(update: Update, context: CallbackContext) -> int:
 
     player1_name = "?"
     if type(play[0]) == User:
-        player1_name = play[0].first_name + " " + "👈" if tgten.cur_player == play[0].id else ""
+        player1_name = play[0].first_name + " " + ("👈" if tgten.cur_player != play[0].id else "")
     player2_name = "?"
     if type(play[1]) == User:
-        player2_name = play[1].first_name + " " + "👈" if tgten.cur_player == play[1].id else ""
+        player2_name = play[1].first_name + " " + ("👈" if tgten.cur_player != play[1].id else "")
 
     operation_user = query.from_user
 
     if game_state == GAME_STATE_B or game_state == GAME_STATE_C:
         if operation_user == play[0] or operation_user == play[1]:
             if tgten.global_state[location[0]][location[1]] != 0:
-                query.edit_message_text("不能走这")
-                query.answer()
+                query.answer("不能走这", show_alert=True)
+                return
+            if game_state == GAME_STATE_B and type(play[0]) == User and operation_user != play[0]:
+                query.answer("你不能走！", show_alert=True)
+                return
+            if game_state == GAME_STATE_C and type(play[1]) == User and operation_user != play[1]:
+                query.answer("你不能走！", show_alert=True)
                 return
             next_game_state = GAME_STATE_D if operation_user == play[0] else GAME_STATE_E
             tgten.location = location
@@ -223,27 +228,35 @@ def game_start(update: Update, context: CallbackContext) -> int:
         else:
             query.answer("你不能走！", show_alert=True)
     elif game_state == GAME_STATE_D or game_state == GAME_STATE_E:
-        if game_state == GAME_STATE_D and operation_user != play[0] and type(play[0]) == User:
+        if game_state == GAME_STATE_D and type(play[0]) == User and operation_user != play[0]:
+            logging.info("state D, player incorrect")
             query.answer("你不能走！", show_alert=True)
             return
-        if game_state == GAME_STATE_E and operation_user != play[1] and type(play[1]) == User:
+        if game_state == GAME_STATE_E and type(play[1]) == User and operation_user != play[1]:
+            logging.info("state E, player incorrect")
             query.answer("你不能走！", show_alert=True)
             return 
-        if operation_user != play[0] and operation_user != play[1]:
+        if (operation_user != play[0] and type(play[0]) == User) and (operation_user != play[1] and type(play[1]) == User):
+            logging.info("state D/E, player incorrect")
             query.answer("你不能走！", show_alert=True)
             return
 
-        if type(play[0]) != User and game_state == GAME_STATE_D:
-            play = (operation_user, play[1])
-        if type(play[1]) != User and game_state == GAME_STATE_E:
-            play = (play[0], operation_user)
+        if game_state == GAME_STATE_D:
+            tgten.player1_id = operation_user.id
+            if type(play[0]) != User:
+                play = (operation_user, play[1])
+        if game_state == GAME_STATE_E:
+            tgten.player2_id = operation_user.id
+            if type(play[1]) != User:
+                play = (play[0], operation_user)            
 
         (next_location, state) = tgten.set_cur_move(query.from_user.id, location)
         if state == TEN_PLAYER1_WIN or state == TEN_PLAYER2_WIN:
-            query.edit_message_text(f"游戏结束，玩家{player1_name if state == TEN_PLAYER1_WIN else player2_name}赢了")
+            query.edit_message_text(f"全局棋局：\n{tgten.tg_global_state()}\n当前棋局：\n{tgten.tg_all_state()}\n游戏结束，玩家{player1_name if state == TEN_PLAYER1_WIN else player2_name}赢了")
             query.answer()
             return
         if state == TEN_INV_MOVE or state == TEN_INV_PLAYER:
+            logging.info(f"ingame error, {state}")
             query.answer("不能走这",show_alert=True)
             return
         if state == TEN_ALL_FILL:
@@ -254,10 +267,10 @@ def game_start(update: Update, context: CallbackContext) -> int:
 
         player1_name = "?"
         if type(play[0]) == User:
-            player1_name = play[0].first_name + " " + "👈" if tgten.cur_player == play[0].id else ""
+            player1_name = play[0].first_name + " " + ("👈" if tgten.cur_player != play[0].id else "")
         player2_name = "?"
         if type(play[1]) == User:
-            player2_name = play[1].first_name + " " + "👈" if tgten.cur_player == play[1].id else ""
+            player2_name = play[1].first_name + " " + ("👈" if tgten.cur_player != play[1].id else "")
 
         if next_location == [-1, -1]:
             next_game_state = GAME_STATE_B if operation_user == play[1] else GAME_STATE_C

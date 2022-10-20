@@ -39,7 +39,7 @@ class tg_ten(ten):
         self._location = [-1, -1]
 
     def set_cur_move(self, cur_player : int, move : List[int]):
-        return self.play(TEN_PLAYER_1 if cur_player == self.player1_id else TEN_PLAYER_2, self._location, move)
+        return self.play(TEN_PLAYER_1 if cur_player == self._player1_id else TEN_PLAYER_2, self._location, move)
 
     def get_tg_tag(self, player):
         t = "⬜️"
@@ -76,6 +76,7 @@ class tg_ten(ten):
                 result.append(self.get_tg_tag(R[2][r][1]))
                 result.append(self.get_tg_tag(R[2][r][2]))
                 result.append("\n")
+            result.append("===============\n")
         return "".join(result)
 
     @property
